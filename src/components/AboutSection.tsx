@@ -9,14 +9,11 @@ const AboutSection = () => {
           <div className="relative flex flex-col items-center gap-8 p-8 md:flex-row md:p-12">
             {/* Photo */}
             <div className="shrink-0">
-              <div className="relative">
-                <div className="absolute -inset-1 rounded-full bg-hero-gradient opacity-75 blur-sm" />
-                <img
-                  src={profilePhoto}
-                  alt="Profile photo"
-                  className="relative h-48 w-48 rounded-full object-cover border-4 border-background"
-                />
-              </div>
+              <img
+                src={profilePhoto}
+                alt="Profile photo"
+                className="h-56 w-44 rounded-xl object-cover"
+              />
             </div>
 
             {/* Info */}
