@@ -29,7 +29,11 @@ const AboutSection = () => {
                   🏢 Ex-Amazon Alexa
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+<<<<<<< HEAD
                   👥 5,000+ Contacts
+=======
+                  👥 5,00+ Connections lI
+>>>>>>> 4e38fb7 (Ready for deployment)
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
                   🏆 LeetCode Rank #234

@@ -41,8 +41,13 @@ Since transformers process all tokens simultaneously (unlike sequential RNNs), t
 From BERT to GPT-4, from Vision Transformers to AlphaFold, the transformer architecture has become the universal backbone of modern AI. Understanding it deeply is essential for any ML practitioner working today.
 
 The key takeaway: attention mechanisms allow models to dynamically focus on relevant parts of the input, making them incredibly flexible and powerful.`,
+<<<<<<< HEAD
     date: "2026-02-10",
     readTime: "8 min read",
+=======
+    date: "2025-02-10",
+    readTime: "1 year ago",
+>>>>>>> 4e38fb7 (Ready for deployment)
     tags: ["Transformers", "NLP", "Deep Learning"],
     coverEmoji: "🧠",
   },
@@ -88,8 +93,13 @@ You can't improve what you can't measure. Build evaluation pipelines early:
 2. Hybrid search (BM25 + dense) outperforms either alone
 3. Re-ranking is often the biggest quality lever
 4. Monitor for drift — your documents and queries change over time`,
+<<<<<<< HEAD
     date: "2026-01-28",
     readTime: "10 min read",
+=======
+    date: "2025-08-28",
+    readTime: "6+ months read",
+>>>>>>> 4e38fb7 (Ready for deployment)
     tags: ["RAG", "LLM", "Production ML"],
     coverEmoji: "🔍",
   },
@@ -134,8 +144,13 @@ If starting over, I'd invest more in:
 - End-to-end models vs. pipeline approaches
 - Better evaluation frameworks from day one
 - More diverse training data earlier in development`,
+<<<<<<< HEAD
     date: "2026-01-15",
     readTime: "7 min read",
+=======
+    date: "2023-01-15",
+    readTime: "2 years read",
+>>>>>>> 4e38fb7 (Ready for deployment)
     tags: ["Voice AI", "Alexa", "NLU"],
     coverEmoji: "🎤",
   },
