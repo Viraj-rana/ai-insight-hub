@@ -3,17 +3,20 @@ import { blogPosts } from '@/data/blogPosts';
 import Navbar from '@/components/Navbar';
 import CommentSection from '@/components/CommentSection';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLikes, useToggleLike, useSaves, useToggleSave } from '@/hooks/useBlogData';
 import { ArrowLeft, Clock, Heart, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { toast } from 'sonner';
 
 const BlogPost = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const post = blogPosts.find((p) => p.id === id);
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [likeCount, setLikeCount] = useState(42);
+
+  const { count: likeCount, userLiked } = useLikes(id || '');
+  const toggleLike = useToggleLike(id || '');
+  const { data: userSaved } = useSaves(id || '');
+  const toggleSave = useToggleSave(id || '');
 
   if (!post) {
     return (
@@ -30,14 +33,21 @@ const BlogPost = () => {
   }
 
   const handleLike = () => {
-    if (!user) return;
-    setLiked(!liked);
-    setLikeCount((c) => (liked ? c - 1 : c + 1));
+    if (!user) {
+      toast.error('Sign in to like posts');
+      return;
+    }
+    toggleLike.mutate(userLiked);
   };
 
   const handleSave = () => {
-    if (!user) return;
-    setSaved(!saved);
+    if (!user) {
+      toast.error('Sign in to save posts');
+      return;
+    }
+    toggleSave.mutate(userSaved ?? false, {
+      onSuccess: () => toast.success(userSaved ? 'Removed from saved' : 'Post saved!'),
+    });
   };
 
   return (
@@ -45,7 +55,6 @@ const BlogPost = () => {
       <Navbar />
 
       <article className="mx-auto max-w-3xl px-4 py-12">
-        {/* Back link */}
         <Link
           to="/"
           className="mb-8 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -54,7 +63,6 @@ const BlogPost = () => {
           Back to blog
         </Link>
 
-        {/* Header */}
         <div className="mb-8">
           <div className="mb-4 flex flex-wrap gap-1.5">
             {post.tags.map((tag) => (
@@ -75,32 +83,30 @@ const BlogPost = () => {
           </div>
         </div>
 
-        {/* Emoji cover */}
         <div className="mb-10 flex h-48 items-center justify-center rounded-xl bg-secondary">
           <span className="text-8xl">{post.coverEmoji}</span>
         </div>
 
-        {/* Actions */}
         <div className="mb-8 flex items-center gap-3">
           <Button
-            variant={liked ? "default" : "outline"}
+            variant={userLiked ? "default" : "outline"}
             size="sm"
             onClick={handleLike}
-            disabled={!user}
-            className={liked ? "bg-hero-gradient" : ""}
+            disabled={toggleLike.isPending}
+            className={userLiked ? "bg-hero-gradient" : ""}
           >
-            <Heart className={`mr-1 h-4 w-4 ${liked ? 'fill-current' : ''}`} />
+            <Heart className={`mr-1 h-4 w-4 ${userLiked ? 'fill-current' : ''}`} />
             {likeCount}
           </Button>
           <Button
-            variant={saved ? "default" : "outline"}
+            variant={userSaved ? "default" : "outline"}
             size="sm"
             onClick={handleSave}
-            disabled={!user}
-            className={saved ? "bg-hero-gradient" : ""}
+            disabled={toggleSave.isPending}
+            className={userSaved ? "bg-hero-gradient" : ""}
           >
-            <Bookmark className={`mr-1 h-4 w-4 ${saved ? 'fill-current' : ''}`} />
-            {saved ? 'Saved' : 'Save'}
+            <Bookmark className={`mr-1 h-4 w-4 ${userSaved ? 'fill-current' : ''}`} />
+            {userSaved ? 'Saved' : 'Save'}
           </Button>
           {!user && (
             <span className="text-xs text-muted-foreground">
@@ -109,7 +115,6 @@ const BlogPost = () => {
           )}
         </div>
 
-        {/* Content */}
         <div className="prose-custom">
           {post.content.split('\n\n').map((paragraph, i) => {
             if (paragraph.startsWith('## ')) {
@@ -153,7 +158,6 @@ const BlogPost = () => {
           })}
         </div>
 
-        {/* Comments */}
         <CommentSection postId={post.id} />
       </article>
     </div>
