@@ -1,16 +1,11 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useComments, useAddComment } from '@/hooks/useBlogData';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { MessageCircle, Send, User } from 'lucide-react';
+import { MessageCircle, Send, User, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-interface Comment {
-  id: string;
-  author: string;
-  text: string;
-  date: string;
-}
+import { toast } from 'sonner';
 
 interface CommentSectionProps {
   postId: string;
@@ -18,39 +13,28 @@ interface CommentSectionProps {
 
 const CommentSection = ({ postId }: CommentSectionProps) => {
   const { user } = useAuth();
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: '1',
-      author: 'ML Enthusiast',
-      text: 'Great article! The section on attention mechanisms was really clear.',
-      date: '2026-02-12',
-    },
-    {
-      id: '2',
-      author: 'Data Scientist',
-      text: 'Would love to see a follow-up on multi-modal transformers!',
-      date: '2026-02-11',
-    },
-  ]);
+  const { data: comments, isLoading } = useComments(postId);
+  const addComment = useAddComment(postId);
   const [newComment, setNewComment] = useState('');
 
   const handleSubmit = () => {
     if (!newComment.trim() || !user) return;
-    const comment: Comment = {
-      id: Date.now().toString(),
-      author: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous',
-      text: newComment,
-      date: new Date().toISOString().split('T')[0],
-    };
-    setComments((prev) => [comment, ...prev]);
-    setNewComment('');
+    addComment.mutate(newComment, {
+      onSuccess: () => {
+        setNewComment('');
+        toast.success('Comment posted!');
+      },
+      onError: (err: any) => {
+        toast.error(err.message || 'Failed to post comment');
+      },
+    });
   };
 
   return (
     <div className="mt-12 border-t border-border pt-8">
       <h3 className="font-heading text-xl font-semibold text-foreground flex items-center gap-2 mb-6">
         <MessageCircle className="h-5 w-5 text-primary" />
-        Comments ({comments.length})
+        Comments {comments ? `(${comments.length})` : ''}
       </h3>
 
       {user ? (
@@ -68,10 +52,14 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
             <Button
               size="sm"
               onClick={handleSubmit}
-              disabled={!newComment.trim()}
+              disabled={!newComment.trim() || addComment.isPending}
               className="bg-hero-gradient"
             >
-              <Send className="mr-1 h-3.5 w-3.5" />
+              {addComment.isPending ? (
+                <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Send className="mr-1 h-3.5 w-3.5" />
+              )}
               Comment
             </Button>
           </div>
@@ -87,22 +75,34 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
         </div>
       )}
 
-      <div className="space-y-4">
-        {comments.map((comment) => (
-          <div key={comment.id} className="flex gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary">
-              <User className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-medium text-foreground">{comment.author}</span>
-                <span className="text-xs text-muted-foreground">{comment.date}</span>
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {comments && comments.length > 0 ? (
+            comments.map((comment: any) => (
+              <div key={comment.id} className="flex gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium text-foreground">{comment.author_name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(comment.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{comment.content}</p>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground">{comment.text}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-4">No comments yet. Be the first!</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
