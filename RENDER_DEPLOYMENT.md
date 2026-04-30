@@ -14,7 +14,7 @@ Make sure your repository contains:
 1. Open Render Dashboard.
 2. Click **New +** -> **Blueprint**.
 3. Select your GitHub repository.
-4. Render will detect `render.yaml` and create the web service.
+4. Render will detect `render.yaml` and create a static web service.
 
 ## 3) Set environment variables (required)
 
@@ -36,5 +36,6 @@ Then deploy/redeploy.
 
 ## Notes
 
-- This app is a React SPA built with Vite and served by Express from `dist`.
+- This app is deployed as a static site from `dist`.
+- A rewrite rule sends all routes to `/index.html` so React Router links work.
 - `VITE_` variables are used at build time, so ensure they are present before the build starts.

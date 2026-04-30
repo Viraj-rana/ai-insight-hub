@@ -1,11 +1,15 @@
 services:
   - type: web
     name: ai-insight-hub
-    env: node
+    runtime: static
     plan: free
     buildCommand: npm ci && npm run build
-    startCommand: npm start
+    staticPublishPath: dist
     autoDeploy: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: NODE_VERSION
         value: 20
