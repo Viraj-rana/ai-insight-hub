@@ -71,3 +71,54 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Supabase blog setup
+
+This app uses Supabase directly from the frontend:
+- Auth: sign up / sign in
+- Data: posts, comments, likes, saves
+
+### 1) Environment variables
+
+Copy `.env.example` to `.env` and set:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- `VITE_WRITER_EMAIL`
+- `PORT` (optional for local Node server)
+
+### 2) Database schema and RLS
+
+Run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor.
+
+It creates:
+- `posts` table for blog content
+- `comments`, `likes`, `saves` with `post_id -> posts.id` foreign keys
+- `photo_urls` on `posts` for blog image galleries
+- `post-images` storage bucket for uploaded blog photos
+- Row Level Security policies:
+  - public read for posts/comments/likes
+  - authenticated users can insert/delete their own comments/likes/saves
+  - users can read only their own saves
+
+### 2.1) Post photo uploads
+
+- Writer can upload up to 10 images while creating a post.
+- Images are uploaded to Supabase Storage bucket `post-images`.
+- Post stores public image URLs in `posts.photo_urls`.
+
+### 3) JWT support
+
+Supabase Auth already issues JWT access tokens after sign-in.
+
+- Read current token from auth context:
+  - `const { getAccessToken } = useAuth()`
+- Build bearer headers for your own backend/API calls:
+  - use `getJwtAuthHeaders()` from `src/lib/authHeaders.ts`
+
+Example usage:
+```ts
+import { getJwtAuthHeaders } from '@/lib/authHeaders';
+
+const headers = await getJwtAuthHeaders();
+await fetch('/api/protected', { headers });
+```

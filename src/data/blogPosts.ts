@@ -1,13 +1,4 @@
-export interface BlogPost {
-  id: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  date: string;
-  readTime: string;
-  tags: string[];
-  coverEmoji: string;
-}
+import { BlogPost } from '@/types/blog';
 
 export const blogPosts: BlogPost[] = [
   {
@@ -45,6 +36,7 @@ The key takeaway: attention mechanisms allow models to dynamically focus on rele
     readTime: "1 year ago",
     tags: ["Transformers", "NLP", "Deep Learning"],
     coverEmoji: "🧠",
+    photoUrls: ["/vanilla-Transformer-attention-mechanism-with-a-detailed-explanation-diagram.jpg"],
   },
   {
     id: "building-rag-systems-production",
@@ -92,6 +84,7 @@ You can't improve what you can't measure. Build evaluation pipelines early:
     readTime: "6+ months read",
     tags: ["RAG", "LLM", "Production ML"],
     coverEmoji: "🔍",
+    photoUrls: ["/1753178843164.png"],
   },
   {
     id: "voice-ai-alexa-experience",
@@ -138,6 +131,7 @@ If starting over, I'd invest more in:
     readTime: "2 years read",
     tags: ["Voice AI", "Alexa", "NLU"],
     coverEmoji: "🎤",
+    photoUrls: ["/alexa.jpg"],
   },
   {
     id: "fine-tuning-llms-practical-guide",
@@ -189,6 +183,7 @@ Before fine-tuning, define your evaluation:
     readTime: "9 min read",
     tags: ["Fine-Tuning", "LLM", "LoRA"],
     coverEmoji: "⚡",
+    photoUrls: ["/medium_data_ccbd9e0d2c.png"],
   },
   {
     id: "ml-system-design-interviews",
@@ -247,5 +242,6 @@ Getting to rank 234 required consistent practice:
     readTime: "11 min read",
     tags: ["System Design", "Interviews", "Career"],
     coverEmoji: "🎯",
+    photoUrls: ["/FastViT_2x.png"],
   },
 ];

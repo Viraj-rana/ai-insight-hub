@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 export const useComments = (postId: string) => {
   return useQuery({
     queryKey: ['comments', postId],
+    enabled: Boolean(postId),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('comments')
@@ -25,6 +26,7 @@ export const useAddComment = (postId: string) => {
   return useMutation({
     mutationFn: async (text: string) => {
       if (!user) throw new Error('Must be logged in');
+      if (!postId) throw new Error('Post id is required');
       const { error } = await supabase.from('comments').insert({
         post_id: postId,
         user_id: user.id,
@@ -45,6 +47,7 @@ export const useLikes = (postId: string) => {
 
   const countQuery = useQuery({
     queryKey: ['likes-count', postId],
+    enabled: Boolean(postId),
     queryFn: async () => {
       const { count, error } = await supabase
         .from('likes')
@@ -57,7 +60,7 @@ export const useLikes = (postId: string) => {
 
   const userLikedQuery = useQuery({
     queryKey: ['likes-user', postId, user?.id],
-    enabled: !!user,
+    enabled: !!user && Boolean(postId),
     queryFn: async () => {
       if (!user) return false;
       const { data, error } = await supabase
@@ -81,6 +84,7 @@ export const useToggleLike = (postId: string) => {
   return useMutation({
     mutationFn: async (currentlyLiked: boolean) => {
       if (!user) throw new Error('Must be logged in');
+      if (!postId) throw new Error('Post id is required');
       if (currentlyLiked) {
         const { error } = await supabase.from('likes').delete().eq('post_id', postId).eq('user_id', user.id);
         if (error) throw error;
@@ -102,7 +106,7 @@ export const useSaves = (postId: string) => {
 
   return useQuery({
     queryKey: ['saves', postId, user?.id],
-    enabled: !!user,
+    enabled: !!user && Boolean(postId),
     queryFn: async () => {
       if (!user) return false;
       const { data, error } = await supabase
@@ -124,6 +128,7 @@ export const useToggleSave = (postId: string) => {
   return useMutation({
     mutationFn: async (currentlySaved: boolean) => {
       if (!user) throw new Error('Must be logged in');
+      if (!postId) throw new Error('Post id is required');
       if (currentlySaved) {
         const { error } = await supabase.from('saves').delete().eq('post_id', postId).eq('user_id', user.id);
         if (error) throw error;

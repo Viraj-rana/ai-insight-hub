@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useComments, useAddComment } from '@/hooks/useBlogData';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,6 +13,7 @@ interface CommentSectionProps {
 }
 
 const CommentSection = ({ postId }: CommentSectionProps) => {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const { data: comments, isLoading } = useComments(postId);
   const addComment = useAddComment(postId);
@@ -34,7 +36,7 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
     <div className="mt-12 border-t border-border pt-8">
       <h3 className="font-heading text-xl font-semibold text-foreground flex items-center gap-2 mb-6">
         <MessageCircle className="h-5 w-5 text-primary" />
-        Comments {comments ? `(${comments.length})` : ''}
+        {t('comments')} {comments ? `(${comments.length})` : ''}
       </h3>
 
       {user ? (
@@ -44,7 +46,7 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
           </div>
           <div className="flex-1">
             <Textarea
-              placeholder="Share your thoughts..."
+              placeholder={t('shareThoughts')}
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               className="mb-2 min-h-[80px] resize-none"
@@ -60,7 +62,7 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
               ) : (
                 <Send className="mr-1 h-3.5 w-3.5" />
               )}
-              Comment
+              {t('comment')}
             </Button>
           </div>
         </div>
@@ -68,9 +70,9 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
         <div className="mb-8 rounded-lg border border-border bg-secondary/50 p-4 text-center">
           <p className="text-sm text-muted-foreground">
             <Link to="/auth" className="font-medium text-primary hover:underline">
-              Sign in
+              {t('signIn')}
             </Link>{' '}
-            to leave a comment
+            {t('signInToComment').replace(`${t('signIn')} `, '')}
           </p>
         </div>
       )}
@@ -99,7 +101,7 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
               </div>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">No comments yet. Be the first!</p>
+            <p className="text-sm text-muted-foreground text-center py-4">{t('noComments')}</p>
           )}
         </div>
       )}
