@@ -97,6 +97,9 @@ insert into storage.buckets (id, name, public)
 values ('post-images', 'post-images', true)
 on conflict (id) do nothing;
 
+-- Demo posts: run seed_blog_posts.sql in the SQL editor so comments/likes match post IDs
+-- (see scripts/emit-seed-sql.ts to regenerate from src/data/blogPosts.ts).
+
 drop policy if exists "Public can read post images" on storage.objects;
 create policy "Public can read post images"
 on storage.objects for select

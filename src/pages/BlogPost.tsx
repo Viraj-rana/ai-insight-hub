@@ -1,6 +1,8 @@
-import { useParams, Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import CommentSection from '@/components/CommentSection';
+import SignInPromptDialog from '@/components/SignInPromptDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLikes, useToggleLike, useSaves, useToggleSave } from '@/hooks/useBlogData';
@@ -12,18 +14,21 @@ import { getFormattedPostDate, getRelativePostTime } from '@/lib/postTime';
 
 const BlogPost = () => {
   const { id } = useParams();
+  const location = useLocation();
+  const [signInDialogOpen, setSignInDialogOpen] = useState(false);
   const { user } = useAuth();
   const { t, localizePost } = useLanguage();
+  const redirectPath = `${location.pathname}${location.search}`;
   const { data: post, isLoading, isError } = usePost(id || '');
 
   const { count: likeCount, userLiked } = useLikes(id || '');
-  const toggleLike = useToggleLike(id || '');
+  const toggleLike = useToggleLike(id || '', post ?? null);
   const { data: userSaved } = useSaves(id || '');
-  const toggleSave = useToggleSave(id || '');
+  const toggleSave = useToggleSave(id || '', post ?? null);
 
   const handleShare = async () => {
     if (!user) {
-      toast.error(t('signInToInteract'));
+      setSignInDialogOpen(true);
       return;
     }
 
@@ -90,7 +95,7 @@ const BlogPost = () => {
 
   const handleLike = () => {
     if (!user) {
-      toast.error(t('signInToInteract'));
+      setSignInDialogOpen(true);
       return;
     }
     toggleLike.mutate(userLiked);
@@ -98,7 +103,7 @@ const BlogPost = () => {
 
   const handleSave = () => {
     if (!user) {
-      toast.error(t('signInToInteract'));
+      setSignInDialogOpen(true);
       return;
     }
     toggleSave.mutate(userSaved ?? false, {
@@ -113,6 +118,11 @@ const BlogPost = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <SignInPromptDialog
+        open={signInDialogOpen}
+        onOpenChange={setSignInDialogOpen}
+        redirectPath={redirectPath}
+      />
 
       <article className="mx-auto max-w-3xl px-4 py-12">
         <Link
@@ -236,7 +246,7 @@ const BlogPost = () => {
           })}
         </div>
 
-        <CommentSection postId={post.id} />
+        <CommentSection postId={post.id} redirectPath={redirectPath} sourcePost={post} />
       </article>
     </div>
   );

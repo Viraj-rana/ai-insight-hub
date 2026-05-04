@@ -1,6 +1,21 @@
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { ensurePostRowExists } from '@/lib/ensurePostRow';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { BlogPost } from '@/types/blog';
+
+function throwIfMissingPostRow(error: { message?: string; code?: string }) {
+  const msg = error.message || '';
+  if (
+    msg.includes('_post_id_fkey') ||
+    (error.code === '23503' && msg.toLowerCase().includes('post_id'))
+  ) {
+    throw new Error(
+      'Could not link this action to a post row. Try again or run supabase/seed_blog_posts.sql in the SQL editor.'
+    );
+  }
+  throw error;
+}
 
 // ---- Comments ----
 export const useComments = (postId: string) => {
@@ -19,7 +34,7 @@ export const useComments = (postId: string) => {
   });
 };
 
-export const useAddComment = (postId: string) => {
+export const useAddComment = (postId: string, sourcePost?: BlogPost | null) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -27,16 +42,19 @@ export const useAddComment = (postId: string) => {
     mutationFn: async (text: string) => {
       if (!user) throw new Error('Must be logged in');
       if (!postId) throw new Error('Post id is required');
+      await ensurePostRowExists(postId, sourcePost);
       const { error } = await supabase.from('comments').insert({
         post_id: postId,
         user_id: user.id,
         author_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous',
         content: text,
       });
-      if (error) throw error;
+      if (error) throwIfMissingPostRow(error);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['comments', postId] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['post', postId] });
     },
   });
 };
@@ -77,7 +95,7 @@ export const useLikes = (postId: string) => {
   return { count: countQuery.data ?? 0, userLiked: userLikedQuery.data ?? false, isLoading: countQuery.isLoading };
 };
 
-export const useToggleLike = (postId: string) => {
+export const useToggleLike = (postId: string, sourcePost?: BlogPost | null) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -89,13 +107,16 @@ export const useToggleLike = (postId: string) => {
         const { error } = await supabase.from('likes').delete().eq('post_id', postId).eq('user_id', user.id);
         if (error) throw error;
       } else {
+        await ensurePostRowExists(postId, sourcePost);
         const { error } = await supabase.from('likes').insert({ post_id: postId, user_id: user.id });
-        if (error) throw error;
+        if (error) throwIfMissingPostRow(error);
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['likes-count', postId] });
       queryClient.invalidateQueries({ queryKey: ['likes-user', postId, user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['post', postId] });
     },
   });
 };
@@ -121,7 +142,7 @@ export const useSaves = (postId: string) => {
   });
 };
 
-export const useToggleSave = (postId: string) => {
+export const useToggleSave = (postId: string, sourcePost?: BlogPost | null) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -133,12 +154,15 @@ export const useToggleSave = (postId: string) => {
         const { error } = await supabase.from('saves').delete().eq('post_id', postId).eq('user_id', user.id);
         if (error) throw error;
       } else {
+        await ensurePostRowExists(postId, sourcePost);
         const { error } = await supabase.from('saves').insert({ post_id: postId, user_id: user.id });
-        if (error) throw error;
+        if (error) throwIfMissingPostRow(error);
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['saves', postId, user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['post', postId] });
     },
   });
 };

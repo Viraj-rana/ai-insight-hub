@@ -2,14 +2,25 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 
+const mapAuthError = (error: { message?: string; status?: number; code?: string }) => {
+  const msg = (error.message || '').toLowerCase();
+  if (error.status === 429 || msg.includes('rate limit') || msg.includes('too many')) {
+    return new Error('EMAIL_RATE_LIMIT');
+  }
+  return error instanceof Error ? error : new Error(String(error.message || 'Auth error'));
+};
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   isWriter: boolean;
   loading: boolean;
   getAccessToken: () => Promise<string | null>;
-  signUp: (email: string, password: string, name: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  /** Creates user; signs in immediately when email confirmation is off in Supabase. */
+  signUpWithEmail: (email: string, password: string, fullName: string) => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -23,7 +34,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isWriter = !!user?.email && !!writerEmail && user.email.toLowerCase() === writerEmail;
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -38,32 +51,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUpWithEmail = async (email: string, password: string, fullName: string) => {
+    const trimmed = email.trim();
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
+      const { data, error } = await supabase.auth.signUp({
+        email: trimmed,
         password,
         options: {
-          data: { full_name: name },
-          emailRedirectTo: window.location.origin,
+          data: { full_name: fullName.trim() },
         },
       });
-      if (error) throw error;
-    } catch (error: any) {
+      if (error) throw mapAuthError(error);
+      if (!data.session) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: trimmed,
+          password,
+        });
+        if (signInError) throw mapAuthError(signInError);
+      }
+    } catch (error: unknown) {
       if (error instanceof TypeError) {
-        throw new Error('Cannot connect to Supabase. Check VITE_SUPABASE_URL and internet/DNS.');
+        throw new Error('NETWORK_AUTH_FAILED');
       }
       throw error;
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signInWithEmail = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-    } catch (error: any) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (error) throw mapAuthError(error);
+    } catch (error: unknown) {
       if (error instanceof TypeError) {
-        throw new Error('Cannot connect to Supabase. Check VITE_SUPABASE_URL and internet/DNS.');
+        throw new Error('NETWORK_AUTH_FAILED');
+      }
+      throw error;
+    }
+  };
+
+  const requestPasswordReset = async (email: string) => {
+    const trimmed = email.trim();
+    const redirectTo = `${window.location.origin}/auth`;
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(trimmed, { redirectTo });
+      if (error) throw mapAuthError(error);
+    } catch (error: unknown) {
+      if (error instanceof TypeError) {
+        throw new Error('NETWORK_AUTH_FAILED');
+      }
+      throw error;
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw mapAuthError(error);
+    } catch (error: unknown) {
+      if (error instanceof TypeError) {
+        throw new Error('NETWORK_AUTH_FAILED');
       }
       throw error;
     }
@@ -82,7 +131,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, isWriter, loading, getAccessToken, signUp, signIn, signOut }}
+      value={{
+        user,
+        session,
+        isWriter,
+        loading,
+        getAccessToken,
+        signUpWithEmail,
+        signInWithEmail,
+        requestPasswordReset,
+        updatePassword,
+        signOut,
+      }}
     >
       {children}
     </AuthContext.Provider>

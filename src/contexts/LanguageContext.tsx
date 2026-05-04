@@ -54,7 +54,30 @@ type TranslationKey =
   | 'publishing'
   | 'publishPost'
   | 'oopsPageNotFound'
-  | 'returnHome';
+  | 'returnHome'
+  | 'accountCreatedWelcome'
+  | 'emailRateLimited'
+  | 'genericError'
+  | 'invalidEmail'
+  | 'passwordTooShort'
+  | 'passwordHintMin'
+  | 'nameRequiredSignUp'
+  | 'cannotReachSupabase'
+  | 'emailConfirmRequiredHint'
+  | 'forgotPassword'
+  | 'resetEmailSent'
+  | 'newPassword'
+  | 'confirmPassword'
+  | 'passwordMismatch'
+  | 'passwordUpdatedSuccess'
+  | 'signInToContinueTitle'
+  | 'signInToContinueDescription'
+  | 'cancel'
+  | 'backToLogin'
+  | 'sendResetLink'
+  | 'updatePasswordSubmit'
+  | 'writeCommentGuest'
+  | 'forgotPasswordHelp';
 
 type LanguageContextType = {
   language: Language;
@@ -117,6 +140,33 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     publishPost: 'Publish Post',
     oopsPageNotFound: 'Oops! Page not found',
     returnHome: 'Return to Home',
+    accountCreatedWelcome: "Welcome! You're signed in.",
+    emailRateLimited:
+      'Too many attempts. Wait a few minutes before trying again.',
+    genericError: 'Something went wrong. Please try again.',
+    invalidEmail: 'Enter a valid email address (example@domain.com).',
+    passwordTooShort: 'Use at least 6 characters for your password.',
+    passwordHintMin: 'At least 6 characters.',
+    nameRequiredSignUp: 'Please enter your name.',
+    cannotReachSupabase:
+      'Could not reach Supabase (Failed to fetch). Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env, your internet, and that the URL uses https and has no typo.',
+    emailConfirmRequiredHint:
+      'Supabase still requires email confirmation. Turn it off: Authentication → Providers → Email → disable “Confirm email”, then try again.',
+    forgotPassword: 'Forgot password?',
+    resetEmailSent: 'Check your email for a reset link.',
+    newPassword: 'New password',
+    confirmPassword: 'Confirm password',
+    passwordMismatch: 'Passwords do not match.',
+    passwordUpdatedSuccess: 'Your password was updated. You are signed in.',
+    signInToContinueTitle: 'Sign in to continue?',
+    signInToContinueDescription:
+      'Create an account or sign in to like, save, share, and comment on posts.',
+    cancel: 'Cancel',
+    backToLogin: 'Back to sign in',
+    sendResetLink: 'Send reset link',
+    updatePasswordSubmit: 'Update password',
+    writeCommentGuest: 'Write a comment',
+    forgotPasswordHelp: 'Enter your email and we will send you a link to reset your password.',
   },
   ru: {
     blog: 'Блог',
@@ -170,6 +220,33 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     publishPost: 'Опубликовать',
     oopsPageNotFound: 'Упс! Страница не найдена',
     returnHome: 'Вернуться на главную',
+    accountCreatedWelcome: 'Добро пожаловать! Вы вошли в аккаунт.',
+    emailRateLimited:
+      'Слишком много попыток. Подождите несколько минут перед повтором.',
+    genericError: 'Что-то пошло не так. Попробуйте снова.',
+    invalidEmail: 'Введите корректный email (пример@домен.com).',
+    passwordTooShort: 'Пароль не короче 6 символов.',
+    passwordHintMin: 'Не менее 6 символов.',
+    nameRequiredSignUp: 'Укажите имя.',
+    cannotReachSupabase:
+      'Нет связи с Supabase (Failed to fetch). Проверьте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY в .env, интернет и что URL с https без опечаток.',
+    emailConfirmRequiredHint:
+      'В Supabase включено подтверждение почты. Отключите: Authentication → Providers → Email → «Confirm email», затем повторите.',
+    forgotPassword: 'Забыли пароль?',
+    resetEmailSent: 'Проверьте почту — мы отправили ссылку для сброса.',
+    newPassword: 'Новый пароль',
+    confirmPassword: 'Подтвердите пароль',
+    passwordMismatch: 'Пароли не совпадают.',
+    passwordUpdatedSuccess: 'Пароль обновлён. Вы вошли в аккаунт.',
+    signInToContinueTitle: 'Войти, чтобы продолжить?',
+    signInToContinueDescription:
+      'Создайте аккаунт или войдите, чтобы лайкать, сохранять, делиться и комментировать.',
+    cancel: 'Отмена',
+    backToLogin: 'Назад ко входу',
+    sendResetLink: 'Отправить ссылку',
+    updatePasswordSubmit: 'Обновить пароль',
+    writeCommentGuest: 'Написать комментарий',
+    forgotPasswordHelp: 'Укажите email — мы отправим ссылку для сброса пароля.',
   },
 };
 
