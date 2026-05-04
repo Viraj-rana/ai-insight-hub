@@ -12,15 +12,17 @@ dist
 dist-ssr
 *.local
 
-<<<<<<< HEAD
-=======
 # Environment variables
 .env
 .env.local
 .env.production
 .env.development
 
->>>>>>> 4e38fb7 (Ready for deployment)
+# Python email checker
+python_email_check/.venv/
+python_email_check/**/__pycache__/
+*.py[cod]
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -77,7 +77,10 @@ type TranslationKey =
   | 'sendResetLink'
   | 'updatePasswordSubmit'
   | 'writeCommentGuest'
-  | 'forgotPasswordHelp';
+  | 'forgotPasswordHelp'
+  | 'emailDisposable'
+  | 'emailDnsInvalid'
+  | 'emailNotAcceptable';
 
 type LanguageContextType = {
   language: Language;
@@ -167,6 +170,10 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     updatePasswordSubmit: 'Update password',
     writeCommentGuest: 'Write a comment',
     forgotPasswordHelp: 'Enter your email and we will send you a link to reset your password.',
+    emailDisposable: 'That email uses a temporary or disposable provider. Use a regular email address.',
+    emailDnsInvalid:
+      'That email domain cannot receive mail (no valid mail servers). Check the spelling or use another address.',
+    emailNotAcceptable: 'This email address cannot be used. Please try a different one.',
   },
   ru: {
     blog: 'Блог',
@@ -247,6 +254,10 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     updatePasswordSubmit: 'Обновить пароль',
     writeCommentGuest: 'Написать комментарий',
     forgotPasswordHelp: 'Укажите email — мы отправим ссылку для сброса пароля.',
+    emailDisposable: 'Это временный или одноразовый email. Укажите обычную почту.',
+    emailDnsInvalid:
+      'Домен не принимает почту (нет почтовых серверов). Проверьте написание или укажите другой адрес.',
+    emailNotAcceptable: 'Этот адрес нельзя использовать. Попробуйте другой.',
   },
 };
 

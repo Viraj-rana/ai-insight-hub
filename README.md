@@ -96,6 +96,24 @@ Copy `.env.example` to `.env` and set:
 - `VITE_SUPABASE_ANON_KEY`
 - `VITE_WRITER_EMAIL`
 - `PORT` (optional for local Node server)
+- `VITE_EMAIL_VALIDATION_URL` (optional) — URL of the Python email checker (see below). If unset, signup does not call the service.
+
+### 1.1) Optional email validation service (Python)
+
+The [`python_email_check`](python_email_check) folder contains a small validator (RFC-style syntax, disposable-domain list, MX DNS check) and a FastAPI server.
+
+```sh
+cd python_email_check
+python -m venv .venv
+# Windows: .venv\Scripts\pip install -r requirements.txt
+# Then:     .venv\Scripts\python -m uvicorn emailcheck.api:app --reload --port 8765
+```
+
+In the project `.env` add: `VITE_EMAIL_VALIDATION_URL=http://127.0.0.1:8765`
+
+Signup and “forgot password” will POST to `/validate` when this variable is set. If the service is unreachable, the app still proceeds (so users are not locked out).
+
+Run tests: `cd python_email_check && .venv\Scripts\pytest -q`
 
 ### 2) Database schema and RLS
 

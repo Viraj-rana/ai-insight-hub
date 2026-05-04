@@ -9,6 +9,7 @@ import Navbar from '@/components/Navbar';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { getSafeRedirectPath } from '@/lib/authRedirect';
+import { validateEmailRemote } from '@/lib/emailValidation';
 
 const MIN_PASSWORD_LEN = 6;
 
@@ -77,6 +78,29 @@ const Auth = () => {
     return true;
   };
 
+  const toastIfEmailRejectedRemotely = async (): Promise<boolean> => {
+    const remote = await validateEmailRemote(email);
+    if (remote.valid) return true;
+    switch (remote.reason) {
+      case 'disposable_domain':
+        toast.error(t('emailDisposable'));
+        break;
+      case 'no_mx':
+      case 'dns_failed':
+      case 'dns_error':
+      case 'dns_timeout':
+        toast.error(t('emailDnsInvalid'));
+        break;
+      case 'invalid_format':
+      case 'empty':
+        toast.error(t('invalidEmail'));
+        break;
+      default:
+        toast.error(remote.detail?.trim() || t('emailNotAcceptable'));
+    }
+    return false;
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail()) return;
@@ -109,6 +133,7 @@ const Auth = () => {
     }
     setLoading(true);
     try {
+      if (!(await toastIfEmailRejectedRemotely())) return;
       await signUpWithEmail(email, password, fullName.trim());
       toast.success(t('accountCreatedWelcome'));
       navigateAfterAuth();
@@ -129,6 +154,7 @@ const Auth = () => {
     if (!validateEmail()) return;
     setLoading(true);
     try {
+      if (!(await toastIfEmailRejectedRemotely())) return;
       await requestPasswordReset(email);
       toast.success(t('resetEmailSent'));
     } catch (err: unknown) {
