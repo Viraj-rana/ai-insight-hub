@@ -62,12 +62,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
       });
       if (error) throw mapAuthError(error);
+      
+      // If no session is returned, it means email confirmation is likely enabled.
+      // We should NOT try to sign in with password here because it will fail with 400 
+      // if the email is not confirmed yet.
       if (!data.session) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: trimmed,
-          password,
-        });
-        if (signInError) throw mapAuthError(signInError);
+        // Just return - the UI will handle the "Check your email" state implicitly 
+        // because no error was thrown but no user is logged in yet.
+        return;
       }
     } catch (error: unknown) {
       if (error instanceof TypeError) {

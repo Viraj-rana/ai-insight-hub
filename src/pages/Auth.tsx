@@ -134,9 +134,21 @@ const Auth = () => {
     setLoading(true);
     try {
       if (!(await toastIfEmailRejectedRemotely())) return;
-      await signUpWithEmail(email, password, fullName.trim());
-      toast.success(t('accountCreatedWelcome'));
-      navigateAfterAuth();
+      const { data } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: { full_name: fullName.trim() },
+        },
+      });
+      
+      if (data?.user && !data.session) {
+        toast.success(t('emailConfirmRequiredHint'));
+        setMode('login');
+      } else {
+        toast.success(t('accountCreatedWelcome'));
+        navigateAfterAuth();
+      }
     } catch (err: unknown) {
       const msg = (err as { message?: string })?.message || '';
       if (msg.includes('Email not confirmed') || msg.toLowerCase().includes('confirm')) {
