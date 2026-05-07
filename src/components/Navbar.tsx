@@ -1,10 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { LogOut, User, PenLine } from 'lucide-react';
 
 const Navbar = () => {
-  const { user, signOut } = useAuth();
+  const { user, isWriter, signOut } = useAuth();
+  const { language, toggleLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -24,10 +26,21 @@ const Navbar = () => {
 
         <div className="flex items-center gap-3">
           <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Blog
+            {t('blog')}
           </Link>
+          <Button variant="outline" size="sm" onClick={toggleLanguage}>
+            {language === 'en' ? 'RU' : 'EN'}
+          </Button>
           {user ? (
             <>
+              {isWriter && (
+                <Link to="/new-post">
+                  <Button size="sm" className="bg-hero-gradient font-medium">
+                    <PenLine className="mr-1 h-4 w-4" />
+                    {t('newPost')}
+                  </Button>
+                </Link>
+              )}
               <div className="flex items-center gap-2 rounded-full bg-secondary px-3 py-1.5">
                 <User className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium text-secondary-foreground">
@@ -42,7 +55,7 @@ const Navbar = () => {
             <Link to="/auth">
               <Button size="sm" className="bg-hero-gradient font-medium">
                 <PenLine className="mr-1 h-4 w-4" />
-                Sign In
+                {t('signIn')}
               </Button>
             </Link>
           )}
