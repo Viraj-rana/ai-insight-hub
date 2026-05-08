@@ -4,11 +4,11 @@ import { dirname, join } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
+//opened ports
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Serve static files from the dist directory
+// serve static files from the dist directory
 app.use(express.static(join(__dirname, 'dist')));
 
 // Handle SPA routing - serve index.html for all routes
