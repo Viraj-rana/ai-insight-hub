@@ -154,7 +154,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     cannotReachSupabase:
       'Could not reach Supabase (Failed to fetch). Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env, your internet, and that the URL uses https and has no typo.',
     emailConfirmRequiredHint:
-      'Supabase still requires email confirmation. Turn it off: Authentication → Providers → Email → disable “Confirm email”, then try again.',
+      'Email confirmation is still on in Supabase. Turn it off: Authentication → Providers → Email → disable “Confirm email”, then sign up or sign in again.',
     forgotPassword: 'Forgot password?',
     resetEmailSent: 'Check your email for a reset link.',
     newPassword: 'New password',
@@ -238,7 +238,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     cannotReachSupabase:
       'Нет связи с Supabase (Failed to fetch). Проверьте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY в .env, интернет и что URL с https без опечаток.',
     emailConfirmRequiredHint:
-      'В Supabase включено подтверждение почты. Отключите: Authentication → Providers → Email → «Confirm email», затем повторите.',
+      'В Supabase включено подтверждение почты. Отключите: Authentication → Providers → Email → «Confirm email», затем войдите снова.',
     forgotPassword: 'Забыли пароль?',
     resetEmailSent: 'Проверьте почту — мы отправили ссылку для сброса.',
     newPassword: 'Новый пароль',

@@ -44,9 +44,13 @@ const Index = () => {
           <h2 className="font-heading text-2xl font-bold text-foreground mb-8">
             {t('latestPosts')}
           </h2>
-          {isLoading && <p className="text-muted-foreground">{t('loadingPosts')}</p>}
-          {isError && <p className="text-destructive">{t('loadPostsError')}</p>}
-          {!isLoading && !isError && (
+          {isLoading && blogPosts.length === 0 && (
+            <p className="text-muted-foreground">{t('loadingPosts')}</p>
+          )}
+          {isError && blogPosts.length === 0 && (
+            <p className="text-destructive">{t('loadPostsError')}</p>
+          )}
+          {blogPosts.length > 0 && (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {blogPosts.map((post, i) => (
                 <BlogCard key={post.id} post={post} index={i} />

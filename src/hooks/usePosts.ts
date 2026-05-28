@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { BlogPost } from '@/types/blog';
-import { blogPosts as staticPosts } from '@/data/blogPosts';
+import { mergeAllPosts, staticPosts } from '@/lib/mergePosts';
 
 type SupabasePostRow = {
   id: string;
@@ -29,19 +29,27 @@ const mapPost = (row: SupabasePostRow): BlogPost => ({
   photoUrls: row.photo_urls ?? [],
 });
 
+async function fetchAllPosts(): Promise<BlogPost[]> {
+  try {
+    const { data, error } = await supabase.from('posts').select(POSTS_COLUMNS);
+
+    if (error) {
+      return mergeAllPosts([]);
+    }
+
+    const fromDb = (data ?? []).map((row) => mapPost(row as SupabasePostRow));
+    return mergeAllPosts(fromDb);
+  } catch {
+    return mergeAllPosts([]);
+  }
+}
+
 export const usePosts = () =>
   useQuery({
     queryKey: ['posts'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('posts')
-        .select(POSTS_COLUMNS)
-        .order('date', { ascending: false });
-      if (error) return staticPosts;
-
-      const mapped = (data ?? []).map((row) => mapPost(row as SupabasePostRow));
-      return mapped.length > 0 ? mapped : staticPosts;
-    },
+    queryFn: fetchAllPosts,
+    initialData: staticPosts,
+    staleTime: 60_000,
   });
 
 export const usePost = (id: string) =>
@@ -49,12 +57,8 @@ export const usePost = (id: string) =>
     queryKey: ['post', id],
     enabled: Boolean(id),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('posts')
-        .select(POSTS_COLUMNS)
-        .eq('id', id)
-        .maybeSingle();
-      if (error) return staticPosts.find((post) => post.id === id) ?? null;
-      return data ? mapPost(data as SupabasePostRow) : staticPosts.find((post) => post.id === id) ?? null;
+      const all = await fetchAllPosts();
+      return all.find((post) => post.id === id) ?? null;
     },
+    placeholderData: () => staticPosts.find((post) => post.id === id) ?? undefined,
   });

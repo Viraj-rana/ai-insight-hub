@@ -16,8 +16,8 @@ interface AuthContextType {
   isWriter: boolean;
   loading: boolean;
   getAccessToken: () => Promise<string | null>;
-  /** Creates user; signs in immediately when email confirmation is off in Supabase. */
-  signUpWithEmail: (email: string, password: string, fullName: string) => Promise<void>;
+  /** Creates user and signs in (requires Confirm email OFF in Supabase). */
+  signUpWithEmail: (email: string, password: string) => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   requestPasswordReset: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
@@ -51,25 +51,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUpWithEmail = async (email: string, password: string, fullName: string) => {
+  const signUpWithEmail = async (email: string, password: string) => {
     const trimmed = email.trim();
+    const displayName = trimmed.split('@')[0] || 'User';
     try {
       const { data, error } = await supabase.auth.signUp({
         email: trimmed,
         password,
         options: {
-          data: { full_name: fullName.trim() },
+          data: { full_name: displayName },
         },
       });
       if (error) throw mapAuthError(error);
-      
-      // If no session is returned, it means email confirmation is likely enabled.
-      // We should NOT try to sign in with password here because it will fail with 400 
-      // if the email is not confirmed yet.
-      if (!data.session) {
-        // Just return - the UI will handle the "Check your email" state implicitly 
-        // because no error was thrown but no user is logged in yet.
-        return;
+
+      if (data.session) return;
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: trimmed,
+        password,
+      });
+      if (signInError) {
+        const msg = (signInError.message || '').toLowerCase();
+        if (msg.includes('confirm') || msg.includes('not confirmed')) {
+          throw new Error('EMAIL_CONFIRMATION_ENABLED');
+        }
+        throw mapAuthError(signInError);
       }
     } catch (error: unknown) {
       if (error instanceof TypeError) {
@@ -85,7 +91,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: email.trim(),
         password,
       });
-      if (error) throw mapAuthError(error);
+      if (error) {
+        const msg = (error.message || '').toLowerCase();
+        if (msg.includes('confirm') || msg.includes('not confirmed')) {
+          throw new Error('EMAIL_CONFIRMATION_ENABLED');
+        }
+        throw mapAuthError(error);
+      }
     } catch (error: unknown) {
       if (error instanceof TypeError) {
         throw new Error('NETWORK_AUTH_FAILED');

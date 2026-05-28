@@ -1,5 +1,8 @@
 -- Blog app schema for Supabase
 -- Run in Supabase SQL editor.
+--
+-- Auth (email + password, no verification):
+-- Dashboard → Authentication → Providers → Email → disable "Confirm email"
 
 create extension if not exists "pgcrypto";
 
